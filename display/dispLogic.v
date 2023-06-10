@@ -11,12 +11,7 @@ module dispLogic #(
     )(
     input clk_pix,
     input rst_n,
-    // input [15:0] btn,
-    // input [2:0] shift,
-    input [(BUFFER_WIDTH-ASCII_WIDTH)/2-1:0] colorIndexF,
-    input [(BUFFER_WIDTH-ASCII_WIDTH)/2-1:0] colorIndexB,
-    input [ASCII_WIDTH-1:0] asciiWrite,
-    // input writeEn,
+    input [BUFFER_WIDTH-1:0] dataWrite,
     input dataReady,
     output vga_hsync,    // horizontal sync
     output vga_vsync,    // vertical sync
@@ -58,15 +53,12 @@ module dispLogic #(
     ) displayBuffer(
         clk_pix,
         rst_n,
-        // btn,
-        // shift,
         chPos_x,
         chPos_y,
-        // writeEn,
         dataReady,
-        asciiWrite,
-        colorIndexF,
-        colorIndexB,
+        dataWrite[7:0],
+        dataWrite[11:8],
+        dataWrite[15:12],
         charBundle
     );
     
@@ -79,7 +71,6 @@ module dispLogic #(
         SCALE,
         CHARA_WIDTH,
         CHARA_HEIGHT,
-        // GRID_ROW,
         CORDW
     ) charaMagnifier(
         rst_n,
@@ -118,16 +109,6 @@ module dispLogic #(
     CLUT backCLUT(charBundle[15:12],backColor);    
     CLUT charCLUT(charBundle[11:8],charColor);
 
-    // reg [3:0] xCnt,yCnt;
-    // always@(posedge x_tick) begin
-        // xCnt <= xCnt == CHARA_WIDTH - 1 ? 0 : xCnt + 1;
-    // end
-    // always@(posedge y_tick) begin
-        // yCnt <= yCnt == CHARA_HEIGHT - 1 ? 0 : yCnt + 1;
-    // end    
-    
-    // integer i;
-    // integer j;
     always@( posedge bitCnt == 0 or negedge rst_n) begin
         if(!rst_n) begin
             chPos_x <= 0;

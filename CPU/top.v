@@ -1,11 +1,10 @@
-`timescale 1ns / 1ps
-//µ¥ÖÜÆÚ RISC-V CPU + RAM
 module CPU_top(
     input         clk,
     input         reset,
     output [31:0] WriteData,
     output [31:0] DataAdr,
-    output        MemWrite
+    output        MemWrite,
+    output [15:0] dispBufferOut
     );
 
     wire [31:0] PC;
@@ -33,7 +32,8 @@ module CPU_top(
         MemWrite,
         DataAdr,
         WriteData,
-        ReadData
+        ReadData,
+        dispBufferOut
     );
     
 endmodule

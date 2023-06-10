@@ -1,25 +1,3 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2023/04/07 16:08:23
-// Design Name: 
-// Module Name: VGA_typewriter
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module VGA_typewriter #(
         parameter H_RES = 640,
         parameter V_RES = 480,
@@ -33,26 +11,20 @@ module VGA_typewriter #(
     )(
         input  clk_50m,     // 50 MHz clock
         input  rst,    // reset button
-        input [3:0] colorIndexF,
-        input [3:0] colorIndexB,
-        input [7:0] keyCode,
+        input [15:0] dataWrite,
         input dataReady,
         output vga_hsync,    // horizontal sync
         output vga_vsync,    // vertical sync
         output [3:0] vga_r,  // 4-bit VGA red
         output [3:0] vga_g,  // 4-bit VGA green
         output [3:0] vga_b  // 4-bit VGA blue
-//        output [11:0] led
     );
     
     // generate pixel clock
     wire clk_pix;
     wire clk_pix_locked;
-    wire [ASCII_WIDTH-1:0] asciiWrite;
+//    wire [ASCII_WIDTH-1:0] dataWrite;
     wire writeEn;
- 
-//    assign led[7:0] = asciiWrite;
-//    assign led[11:8] = 0;
     
     
     clk_wiz_0 clock_pix_inst (
@@ -78,9 +50,7 @@ module VGA_typewriter #(
     )Display (
         clk_pix,
         rst_n,
-        colorIndexF,
-        colorIndexB,
-        asciiWrite,
+        dataWrite,
         dataReady,
         vga_hsync,  
         vga_vsync,  
@@ -88,14 +58,6 @@ module VGA_typewriter #(
     );
     
 
-//   exKeyIn #(
-//       ASCII_WIDTH
-//   )
-//   xKey(
-//       keyCode,
-//       asciiWrite
-//   );
-           
 endmodule
 
 

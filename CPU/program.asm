@@ -27,11 +27,25 @@ addi	x4 x0 0
 addi	x5 x0 0
 addi	x6 x0 0
 addi	x7 x0 0
+addi    x10 x0 1792
+addi    x10 x10 1792
+addi    x10 x10 1792 //x10 = 0x1500, for display color
+addi    x11 x0 0 //display position register
+addi    x12 x10 127 // display content register
+addi    x13 x0 200 //end of display memory segment
+sw x12 256(x11) 
+
+screenInit: // screen initialize 
+beq x11 x13 control
+addi x11 x11 4
+sw x10 256(x11) //fill the screen with background color 
+jal x7 screenInit
+
 
 //---------------------------------------------------------------
 //控制模块
 control:
-lw	x1 20(x0)	
+lw	x1 0(x0)	
 addi	x2 x0 1		//x2作为裁决数
 beq 	x1 x2 plus
 addi	x2 x0 2
@@ -116,6 +130,9 @@ jal	x7 control
 convertStart:
 addi x1 x0 1
 addi x2 x0 10
+addi x8 x0 0 // convert string length register
+addi x9 x0 4 // store 4 to operate minus 4
+addi x11 x0 0 // display position return 0
 lw x3 12(x0)
 addi x4 x0 0
 jal x5 lessThanTenBranch
@@ -129,14 +146,31 @@ jal x5 lessThanTenBranch
 
 
 sendASCII:
-addi x3 x3 5376 // extend BCD to ASCII length and add color (+16'h1500)
-sw x3 0(x0)
-beq x4 x0 convertDone
+sw x3 0(x8)
+addi x8 x8 4
+beq x4 x0 displayStart
 add x3 x4 x0
 addi x4 x0 0
 jal x5 lessThanTenBranch
 
 
-convertDone:
-addi x0 x0 0
-jal x5 convertDone
+// move ASCII to display memory
+displayStart:
+lw x12 0(x8)
+addi x12 x12 48
+add x12 x12 x10
+sw x12 256(x11)
+addi x11 x11 4 // x11 + 4
+beq x8 x0 displayDone
+sub x8 x8 x9 // x8 - 4
+jal x5 displayStart
+
+displayEnd:
+addi x12 x10 127
+sw x12 256(x11)
+jal x5 displayDone
+
+displayDone:
+jal x5 displayDone
+
+

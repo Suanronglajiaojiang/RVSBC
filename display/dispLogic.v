@@ -11,11 +11,15 @@ module dispLogic #(
     )(
     input clk_pix,
     input rst_n,
-    input [BUFFER_WIDTH-1:0] dataWrite,
-    input dataReady,
+    // input [BUFFER_WIDTH-1:0] dataWrite,
+    // input dataReady,
+    input bufferWe,
+    input [31:0] bufferAddr,
+    input [31:0] bufferData,
     output vga_hsync,    // horizontal sync
     output vga_vsync,    // vertical sync
-    output reg [11:0] vga  // 12-bit VGA color
+    output reg [11:0] vga,  // 12-bit VGA color
+    output [11:0] led
     );
     
     wire dataEnable;
@@ -55,17 +59,15 @@ module dispLogic #(
         rst_n,
         chPos_x,
         chPos_y,
-        dataReady,
-        dataWrite[7:0],
-        dataWrite[11:8],
-        dataWrite[15:12],
-        charBundle
+        bufferWe,
+        bufferAddr,
+        bufferData,
+        charBundle,
+        led
     );
     
     wire [3:0] bitCnt;
     wire [3:0] lineCnt;
-    wire x_tick;
-    wire y_tick;
      
     magnifier #(
         SCALE,
@@ -73,14 +75,13 @@ module dispLogic #(
         CHARA_HEIGHT,
         CORDW
     ) charaMagnifier(
+        clk_pix,
         rst_n,
         dataEnable,
         sx,
         sy,
         bitCnt,
-        lineCnt,
-        x_tick,
-        y_tick
+        lineCnt
     );    
  
     wire [ADDR_WIDTH-1:0] charaLineAddr;

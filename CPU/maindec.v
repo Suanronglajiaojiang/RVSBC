@@ -10,7 +10,7 @@ module maindec (
 	output [1:0] ALUOp
 );
 
-	reg [10:0] controls;
+	reg [10:0] controls = 0;//debug
 	assign {RegWrite, ImmSrc, ALUSrc, MemWrite, ResultSrc, Branch, ALUOp, Jump} = controls;
 	always @(*)
 		case (op)

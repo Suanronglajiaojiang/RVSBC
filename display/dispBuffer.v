@@ -8,82 +8,42 @@ module dispBuffer #(
     input rst_n,
     input [$clog2(GRID_COL)-1:0] chPos_x,
     input [$clog2(GRID_ROW)-1:0] chPos_y,
-    input dataReady,
-    input [ASCII_WIDTH-1:0] ascii,
-    input [(BUFFER_WIDTH-ASCII_WIDTH)/2-1:0] colorIndexF_in,
-    input [(BUFFER_WIDTH-ASCII_WIDTH)/2-1:0] colorIndexB_in,
-    output reg [BUFFER_WIDTH-1:0] bufferBundle
+    // input dataReady,
+    // input [ASCII_WIDTH-1:0] ascii,
+    // input [(BUFFER_WIDTH-ASCII_WIDTH)/2-1:0] colorIndexF_in,
+    // input [(BUFFER_WIDTH-ASCII_WIDTH)/2-1:0] colorIndexB_in,
+    input         we,
+    input  [31:0] a,
+    input  [31:0] wd,    
+    output reg [BUFFER_WIDTH-1:0] bufferBundle,
+    output [11:0] led
     ); 
     integer i;
 
-    reg [BUFFER_WIDTH-1:0] Buffer [GRID_COL*GRID_ROW-1:0];
-    reg [BUFFER_WIDTH-1:0] cursorTemp = 0; 
-    reg [$clog2(GRID_COL*GRID_ROW)-1:0] wrPos;
+    reg [BUFFER_WIDTH-1:0] Buffer [GRID_COL*GRID_ROW  -1 : 0];
 
-    wire colorIndexF = colorIndexF_in == 0 ? 5 : colorIndexF_in;
-    wire colorIndexB = colorIndexB_in == 0 ? 1 : colorIndexB_in;
+    initial begin
+        $readmemh("dispBufferInit.mem",Buffer);
+    end
 
-    
-    always@(posedge dataReady or negedge rst_n) begin
-        if(!rst_n ) begin
-            for(i=1; i<GRID_COL*GRID_ROW; i=i+1) begin
-                 Buffer[i] <= {4'd1,4'd5,8'd0};  
-            end
-            wrPos <= 0; 
-            Buffer[wrPos] <= {4'd1,4'd5,8'd127}; 
-            cursorTemp <= {4'd1,4'd5,8'd0};     
-        end
-        else if(ascii==8'b00010001) begin  //left
-            Buffer[wrPos] <= cursorTemp;
-            cursorTemp <= Buffer[wrPos==0 ? GRID_COL*GRID_ROW-1 : wrPos-1];        
-            Buffer[wrPos==0 ? GRID_COL*GRID_ROW-1 : wrPos-1] <= {colorIndexB,colorIndexF,8'd127};
-            wrPos <= wrPos==0 ? GRID_COL*GRID_ROW-1 : wrPos-1 ;            
-        end
-        else if(ascii==8'b00010100) begin  //right
-            Buffer[wrPos] <= cursorTemp;
-            cursorTemp <= Buffer[wrPos==GRID_COL*GRID_ROW-1 ? 0 : wrPos+1];        
-            Buffer[wrPos==GRID_COL*GRID_ROW-1 ? 0 : wrPos+1] <= {colorIndexB,colorIndexF,8'd127};
-            wrPos <= wrPos==GRID_COL*GRID_ROW-1 ? 0 : wrPos+1;            
-        end
-        else if(ascii==8'b00010010) begin  //up
-            Buffer[wrPos] <= cursorTemp;
-            cursorTemp <= Buffer[wrPos>=GRID_COL ? wrPos-GRID_COL : wrPos+(GRID_ROW-1)*GRID_COL];        
-            Buffer[wrPos>=GRID_COL ? wrPos-GRID_COL : wrPos+(GRID_ROW-1)*GRID_COL] <= {colorIndexB,colorIndexF,8'd127};
-            wrPos <= wrPos>=GRID_COL ? wrPos-GRID_COL : wrPos+(GRID_ROW-1)*GRID_COL;            
-        end
-        else if(ascii==8'b00010011) begin  //down
-            Buffer[wrPos] <= cursorTemp;
-            cursorTemp <= Buffer[wrPos<(GRID_ROW-1)*GRID_COL ? wrPos+GRID_COL : wrPos-(GRID_ROW-1)*GRID_COL];        
-            Buffer[wrPos<(GRID_ROW-1)*GRID_COL ? wrPos+GRID_COL : wrPos-(GRID_ROW-1)*GRID_COL] <= {colorIndexB,colorIndexF,8'd127};
-            wrPos <= wrPos<(GRID_ROW-1)*GRID_COL ? wrPos+GRID_COL : wrPos-(GRID_ROW-1)*GRID_COL;            
-        end 
-        else if(ascii==8'b00001101) begin  //enter
-            Buffer[wrPos] <= cursorTemp;
-            cursorTemp <= Buffer[ wrPos<(GRID_ROW-1)*GRID_COL ? ((wrPos/GRID_COL)+1)*GRID_COL : 0 ];        
-            Buffer[ wrPos<(GRID_ROW-1)*GRID_COL ? ((wrPos/GRID_COL)+1)*GRID_COL : 0 ] <= {colorIndexB,colorIndexF,8'd127};
-            wrPos <= wrPos<(GRID_ROW-1)*GRID_COL ? ((wrPos/GRID_COL)+1)*GRID_COL : 0 ;            
-        end 
-        else if(ascii==8'b01111111) begin //backSpace
-            Buffer[wrPos] <= {colorIndexB,colorIndexF,8'd0};
-            cursorTemp <= {colorIndexB,colorIndexF,8'd0};        
-            Buffer[wrPos==0 ? GRID_COL*GRID_ROW-1 : wrPos-1] <= {colorIndexB,colorIndexF,8'd127};
-            wrPos <= wrPos==0 ? GRID_COL*GRID_ROW-1 : wrPos-1 ;                        
-        end 
-        else if(ascii==8'b00000010) begin //clear
-            for(i=1; i<GRID_COL*GRID_ROW; i=i+1) begin
-                Buffer[i] <= {colorIndexB,colorIndexF,8'd0};  
-            end
-            wrPos <= 0; 
-            Buffer[0] <= {colorIndexB,colorIndexF,8'd127}; 
-            cursorTemp <= {colorIndexB,colorIndexF,8'd0};         
-        end      
-        else begin
-            Buffer[wrPos] <= {colorIndexB,colorIndexF,ascii};
-            cursorTemp <= Buffer[wrPos==GRID_COL*GRID_ROW-1 ? 0 : wrPos+1];  
-            wrPos <= wrPos<GRID_COL*GRID_ROW-1 ? wrPos + 1 : 0;
-            Buffer[ wrPos==GRID_COL*GRID_ROW-1 ? 0 : wrPos+1 ] <= {colorIndexB,colorIndexF,8'd127};
-        end
-    end                  
+    // reg temp0,temp1;
+    // wire trig = temp0 & !temp1;
+    // 
+    // always@( clk_pix ) begin
+        // temp0 <= we;
+        // temp1 <= temp0;
+    // end
+
+
+    always@( posedge clk_pix ) begin
+        if( we & a >= 256 & a < 456 )
+            Buffer[a[7:2]] <= wd[15:0];
+
+    end
+
+    // assign led[3:0] = Buffer[3][3:0];
+    // assign led[7:4] = Buffer[1][3:0]; 
+    // assign led[11:8] = Buffer[0][3:0];
 
     always@(posedge clk_pix or negedge rst_n) begin
         if(!rst_n) begin

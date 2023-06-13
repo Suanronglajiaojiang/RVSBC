@@ -2,12 +2,12 @@
 module riscvsingle (
 	input         clk,
 	input         reset,
-	output [31:0] PC,
 	input  [31:0] Instr,
+	input  [31:0] ReadData,
+	output [31:0] PC,
 	output        MemWrite,
 	output [31:0] ALUResult,
-	output [31:0] WriteData,
-	input  [31:0] ReadData
+	output [31:0] WriteData
 );
 	
 	wire ALUSrc;

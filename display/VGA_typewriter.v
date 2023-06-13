@@ -11,17 +11,22 @@ module VGA_typewriter #(
     )(
         input  clk_50m,     // 50 MHz clock
         input  rst,    // reset button
-        input [15:0] dataWrite,
-        input dataReady,
+        // input [15:0] dataWrite,
+        // input dataReady,
+        input bufferWe,
+        input [31:0] bufferAddr,
+        input [31:0] bufferData,        
         output vga_hsync,    // horizontal sync
         output vga_vsync,    // vertical sync
         output [3:0] vga_r,  // 4-bit VGA red
         output [3:0] vga_g,  // 4-bit VGA green
-        output [3:0] vga_b  // 4-bit VGA blue
+        output [3:0] vga_b,  // 4-bit VGA blue
+        output clk_pix,
+        output [11:0] led
     );
     
     // generate pixel clock
-    wire clk_pix;
+//    wire clk_pix;
     wire clk_pix_locked;
 //    wire [ASCII_WIDTH-1:0] dataWrite;
     wire writeEn;
@@ -38,6 +43,7 @@ module VGA_typewriter #(
 
     wire [11:0] vga;
     assign vga = {vga_r,vga_g,vga_b};
+
     
     dispLogic #(
         .GRID_ROW(GRID_ROW),
@@ -50,14 +56,19 @@ module VGA_typewriter #(
     )Display (
         clk_pix,
         rst_n,
-        dataWrite,
-        dataReady,
+        // dataWrite,
+        // dataReady,
+        bufferWe,
+        bufferAddr,
+        bufferData,        
         vga_hsync,  
         vga_vsync,  
-        vga
+        vga,
+        led
     );
     
 
 endmodule
+
 
 
